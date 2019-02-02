@@ -20,9 +20,7 @@ namespace BlazorSharedWebWorkerWebSocketHelper
         [JSInvokable]
         public static void HandleMessageBinary(byte[] data)
         {
-
-            SharedWebWorkerWebSocketHelper1.OnMessage?.Invoke(data);
-               
+            SharedWebWorkerWebSocketHelper1.OnMessage?.Invoke(data);    
         }
     }
     
