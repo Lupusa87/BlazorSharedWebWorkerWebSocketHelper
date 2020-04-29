@@ -1,4 +1,5 @@
 ﻿using Microsoft.JSInterop;
+using Mono.WebAssembly.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,19 @@ namespace BlazorSharedWebWorkerWebSocketHelper
     {
         public static SharedWebWorkerWebSocketHelper SharedWebWorkerWebSocketHelper1;
 
+        public static MonoWebAssemblyJSRuntime monoWebAssemblyJSRuntime = new MonoWebAssemblyJSRuntime();
+
         [JSInvokable]
-        public static byte[] AllocateArray(string length)
+        public static void AllocateArray(int length)
         {
-            return new byte[int.Parse(length)];
+
+            byte[] b = new byte[length];
+
+
+            monoWebAssemblyJSRuntime.InvokeUnmarshalled<byte[], bool>("BSwwWsJsFunctions.GetBinaryData", b);
+
+            HandleMessageBinary(b);
+
         }
 
 

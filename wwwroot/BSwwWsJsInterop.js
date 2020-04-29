@@ -9,6 +9,9 @@ const SwwState = {
 
 var SharedWebWorker1;
 
+var tmpValue1;
+
+
 function SwwOnError(e, dotnethelper) {
     dotnethelper.invokeMethodAsync('InvokeOnError', e.message);
 }
@@ -16,32 +19,10 @@ function SwwOnError(e, dotnethelper) {
 
 function SwwOnMessage(e) {
 
-        var allocateArrayMethod = Blazor.platform.findMethod(
-            'BlazorSharedWebWorkerWebSocketHelper',
-            'BlazorSharedWebWorkerWebSocketHelper',
-            'StaticClass',
-            'AllocateArray'
-        );
+    tmpValue1 = e.data;
 
-        var dotNetArray = Blazor.platform.callMethod(allocateArrayMethod,
-            null,
-            [Blazor.platform.toDotNetString(e.data.byteLength.toString())]);
-
-        var arr = Blazor.platform.toUint8Array(dotNetArray);
-
-
-        arr.set(new Uint8Array(e.data));
-
-        var receiveResponseMethod = Blazor.platform.findMethod(
-            'BlazorSharedWebWorkerWebSocketHelper',
-            'BlazorSharedWebWorkerWebSocketHelper',
-            'StaticClass',
-            'HandleMessageBinary'
-        );
-
-        Blazor.platform.callMethod(receiveResponseMethod,
-            null,
-            [dotNetArray]);
+    Module.mono_call_static_method('[BlazorSharedWebWorkerWebSocketHelper] BlazorSharedWebWorkerWebSocketHelper.StaticClass:AllocateArray',
+        [tmpValue1.byteLength]);
 }
 
 
@@ -79,6 +60,14 @@ window.BSwwWsJsFunctions = {
 
         SharedWebWorker1 = null;
 
+        return true;
+    },
+    GetBinaryData: function (d) {
+
+        var destinationUint8Array = Blazor.platform.toUint8Array(d);
+        destinationUint8Array.set(new Uint8Array(tmpValue1));
+
+        tmpValue1 = null;
         return true;
     },
 };

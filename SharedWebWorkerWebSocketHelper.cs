@@ -18,6 +18,9 @@ namespace BlazorSharedWebWorkerWebSocketHelper
 
         public BSwwWsState bSwwWsState = BSwwWsState.Undefined;
 
+
+        BSwwWsJsInterop bSwwWsJsInterop;
+
         public string _SharedWebWorkerName { get; private set; }
         private string _url = string.Empty;
 
@@ -25,11 +28,17 @@ namespace BlazorSharedWebWorkerWebSocketHelper
         public Action<byte[]> OnMessage { get; set; }
         public Action<string> OnError { get; set; }
 
+        private IJSRuntime _JSRuntime;
 
-        public SharedWebWorkerWebSocketHelper(string Par_URL, string Par_SharedWebWorkerName)
+        public SharedWebWorkerWebSocketHelper(string Par_URL, string Par_SharedWebWorkerName, IJSRuntime jsRuntime)
         {
+            _JSRuntime = jsRuntime ??
+              throw new ArgumentNullException($"{nameof(jsRuntime)} missing. Try injecting it in your component, then passing it from OnAfterRender.");
+
+            bSwwWsJsInterop = new BSwwWsJsInterop(_JSRuntime);
 
             _initialize(Par_URL, Par_SharedWebWorkerName);
+
         }
 
 
@@ -40,7 +49,7 @@ namespace BlazorSharedWebWorkerWebSocketHelper
                 StaticClass.SharedWebWorkerWebSocketHelper1 = this;
                 _url = Par_URL;
                 _SharedWebWorkerName = Par_SharedWebWorkerName;
-                BSwwWsJsInterop.SwwCreate(_url, _SharedWebWorkerName, new DotNetObjectRef(this));
+                bSwwWsJsInterop.SwwCreate(_url, _SharedWebWorkerName, DotNetObjectReference.Create(this));
             }
             else
             {
@@ -55,7 +64,7 @@ namespace BlazorSharedWebWorkerWebSocketHelper
 
             if (Par_Message.Length > 0)
             {
-                BSwwWsJsInterop.SwwSend(Par_Message);
+                bSwwWsJsInterop.SwwSend(Par_Message);
             }
             else
             {
@@ -86,7 +95,7 @@ namespace BlazorSharedWebWorkerWebSocketHelper
           
             InvokeStateChanged(2);
 
-            BSwwWsJsInterop.SwwRemove();
+            bSwwWsJsInterop.SwwRemove();
 
             GC.SuppressFinalize(this);
         }

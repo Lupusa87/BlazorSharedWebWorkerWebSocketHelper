@@ -1,7 +1,5 @@
 using Microsoft.JSInterop;
 using Mono.WebAssembly.Interop;
-using System;
-using System.Reflection;
 using System.Threading.Tasks;
 
 
@@ -9,36 +7,33 @@ namespace BlazorSharedWebWorkerWebSocketHelper
 {
     public class BSwwWsJsInterop
     {
-        public static Task<string> Alert(string message)
+
+        private IJSRuntime _JSRuntime;
+        public BSwwWsJsInterop(IJSRuntime jsRuntime) => _JSRuntime = jsRuntime;
+        public static MonoWebAssemblyJSRuntime monoWebAssemblyJSRuntime = new MonoWebAssemblyJSRuntime();
+
+        public ValueTask<string> Alert(string message)
         {
-            return JSRuntime.Current.InvokeAsync<string>(
+            return _JSRuntime.InvokeAsync<string>(
                 "BSwwWsJsFunctions.alert",
                 message);
         }
 
-        public static Task<bool> SwwCreate(string SwwUrl, string SwwName, DotNetObjectRef dotnethelper)
+        public ValueTask<bool> SwwCreate(string SwwUrl, string SwwName, DotNetObjectReference<SharedWebWorkerWebSocketHelper> dotnethelper)
         {
-           return JSRuntime.Current.InvokeAsync<bool>("BSwwWsJsFunctions.SwwCreate", new { SwwUrl, SwwName, dotnethelper }); 
+           return _JSRuntime.InvokeAsync<bool>("BSwwWsJsFunctions.SwwCreate", new { SwwUrl, SwwName, dotnethelper }); 
         }
 
-        public static bool SwwSend(byte[] Message)
+        public bool SwwSend(byte[] Message)
         {
-         
-                if (JSRuntime.Current is MonoWebAssemblyJSRuntime mono)
-                {
-
-                    return mono.InvokeUnmarshalled<byte[], bool>(
+            return monoWebAssemblyJSRuntime.InvokeUnmarshalled<byte[], bool>(
                         "BSwwWsJsFunctions.SwwSend",Message);
-                }
-
-            return false;
-
         }
 
 
-        public static Task<bool> SwwRemove()
+        public ValueTask<bool> SwwRemove()
         {
-            return JSRuntime.Current.InvokeAsync<bool>("BSwwWsJsFunctions.SwwRemove");
+            return _JSRuntime.InvokeAsync<bool>("BSwwWsJsFunctions.SwwRemove");
         }
 
     }
